@@ -1,0 +1,79 @@
+<!-- templates/_3mancap/dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        /* Add your custom styles here */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .status-bar {
+            background-color: #FFD700;
+            text-align: center;
+            padding: 10px;
+            color: white;
+            font-weight: bold;
+        }
+        .log-entry {
+            padding: 5px 0;
+        }
+        .stat-box {
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="dashboard-header">DEVICE DASHBOARD</h1>
+        <div class="status-bar">Device In Range</div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>ACTIVITY LOG</h4>
+                <div class="log">
+                    {% for log in activity_logs %}
+                    <div class="log-entry">{{ log.timestamp|date:"H:i" }} - {{ log.description }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="stat-box">
+                            {{ devices_connected }}<br>
+                            <span class="text-muted">Devices connected</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-box">
+                            {{ incidents_to_review }}<br>
+                            <span class="text-muted">Incidents to review</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-box">
+                            {{ events_recorded }}<br>
+                            <span class="text-muted">Events recorded</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-box">
+                            0<br>
+                            <span class="text-muted">Events recorded</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
