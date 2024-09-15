@@ -15,11 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 # myproject/urls.py
+# myproject/urls.py
 
 from django.contrib import admin
 from django.urls import path, include
+from _3mancap import views  # Import the dashboard view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('_3mancap/', include('_3mancap.urls')),
+    # Remove the _3mancap prefix and serve the dashboard directly from root URL
+    path('', views.dashboard, name='home'),  # Serve the dashboard at the root
+    # Optionally, include other URLs if necessary
+    # path('_3mancap/', include('_3mancap.urls')),
 ]

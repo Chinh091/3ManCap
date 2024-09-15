@@ -18,4 +18,4 @@ def dashboard(request):
         'incidents_to_review': incidents_to_review,
         'events_recorded': events_recorded,
     }
-    return render(request, '_3mancap/dashboard.html', context)
+    return render(request, '_3mancap/dashboard.html')
