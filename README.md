@@ -1,3 +1,5 @@
 Database Login 
-Master username: admin_3mancap
+
+Master username: admin
+
 Master password: 3mancap2024
