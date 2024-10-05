@@ -5,75 +5,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title>Dashboard</title>
     <style>
-        /* Add your custom styles here */
-        .dashboard-header {
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
             text-align: center;
-            margin-bottom: 20px;
+            margin-top: 50px;
         }
-        .status-bar {
-            background-color: #FFD700;
+
+        h1 {
             text-align: center;
-            padding: 10px;
+            width: 100%;
+            font-size: 2.5em;
+            color: #4A90E2;
+        }
+
+        .button {
+            padding: 15px 32px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        #toggleBtn {
+            background-color: #4CAF50;
             color: white;
-            font-weight: bold;
         }
-        .log-entry {
-            padding: 5px 0;
+
+        #toggleBtn.off {
+            background-color: #F44336;
         }
-        .stat-box {
-            padding: 20px;
-            text-align: center;
+
+        #startTrackingBtn {
+            background-color: #9E9E9E;
+            color: white;
+        }
+
+        #startTrackingBtn.active {
+            background-color: #FFEB3B;
+            color: black;
+        }
+
+        #panicButton {
+            background-color: #FF9800;
+            color: white;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .activity-log, .stats {
+            width: 45%;
+            text-align: left;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f1f1f1;
+        }
+
+        .activity-log h2, .stats h2 {
             font-size: 24px;
+            color: #333;
+        }
+
+        .activity-log ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .activity-log li {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+            cursor: pointer; /* Indicate that the item is clickable */
+        }
+
+        .activity-log li:hover {
+            background-color: #d3d3d3;
+        }
+
+        .stats .stat-item {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        .tracking-report {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #d0f0c0; /* Light green background */
+            width: 80%; /* Set width to align with the other sections */
+            max-width: 600px; /* Max width for the report */
+            margin-left: auto; /* Center the report */
+            margin-right: auto; /* Center the report */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add some shadow for depth */
+        }
+
+        .tracking-report h2 {
+            font-size: 24px;
+        }
+
+        .tracking-report ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .tracking-report li {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #b2e0b2; /* Slightly darker green */
+            border-radius: 5px;
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Modal Styles */
+        #myModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
             font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 90%;
+            }
+
+            .activity-log, .stats {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .tracking-report {
+                width: 100%; /* Full width for smaller screens */
+            }
         }
     </style>
 </head>
 <body>
+
+    <h1>Dashboard</h1>
+
+    <button id="toggleBtn" class="button" onclick="toggleOnOff()">On</button>
+    <button id="startTrackingBtn" class="button" onclick="startTracking()">Start Tracking</button>
+    <button id="panicButton" class="button" onclick="alertEmergency()">Panic Button</button>
+
     <div class="container">
-        <h1 class="dashboard-header">DEVICE DASHBOARD</h1>
-        <div class="status-bar">Device In Range</div>
-        
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <h4>ACTIVITY LOG</h4>
-                <div class="log">
-                    {% for log in activity_logs %}
-                    <div class="log-entry">{{ log.timestamp|date:"H:i" }} - {{ log.description }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="stat-box">
-                            {{ devices_connected }}<br>
-                            <span class="text-muted">Devices connected</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="stat-box">
-                            {{ incidents_to_review }}<br>
-                            <span class="text-muted">Incidents to review</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="stat-box">
-                            {{ events_recorded }}<br>
-                            <span class="text-muted">Events recorded</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="stat-box">
-                            0<br>
-                            <span class="text-muted">Events recorded</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="activity-log">
+            <h2>Recent Activity</h2>
+            <ul id="activityLog"></ul>
+        </div>
+
+        <div class="stats">
+            <h2>Stats</h2>
+            <div class="stat-item">No Fall: <span id="noFallCount">0</span></div>
+            <div class="stat-item">Trip: <span id="tripCount">0</span></div>
+            <div class="stat-item">Small Fall: <span id="smallFallCount">0</span></div>
+            <div class="stat-item">Large Fall: <span id="largeFallCount">0</span></div>
         </div>
     </div>
+
+    <div class="tracking-report">
+        <h2>Tracking Report</h2>
+        <ul id="trackingReport"></ul>
+    </div>
+
+    <!-- Modal for Activity Details -->
+    <div id="myModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Activity Details</h2>
+            <p id="activityDetails"></p>
+        </div>
+    </div>
+
+    <script>
+        let isOn = false;
+        let noFallCount = 0;
+        let tripCount = 0;
+        let smallFallCount = 0;
+        let largeFallCount = 0;
+        let trackingInterval; // Variable to hold the interval
+        let trackingResults = []; // Array to hold tracking results
+
+        function toggleOnOff() {
+            const button = document.getElementById('toggleBtn');
+            isOn = !isOn; // Toggle the state
+
+            if (isOn) {
+                button.textContent = 'Off';  // Change text to 'Off'
+                button.classList.add('off');  // Add 'off' class for red background
+            } else {
+                button.textContent = 'On';   // Change text to 'On'
+                button.classList.remove('off'); // Remove 'off' class for green background
+            }
+        }
+
+        function startTracking() {
+            // Only proceed if the toggle is "On"
+            if (!isOn) {
+                alert("Please turn on the tracking before starting.");
+                return; // Exit the function early
+            }
+
+            const trackingButton = document.getElementById('startTrackingBtn');
+            trackingButton.textContent = 'Tracking in Progress'; // Change button text
+            trackingButton.classList.add('active');
+
+            let outputsRemaining = 5; // Number of outputs to generate
+            trackingResults = []; // Clear previous tracking results
+
+            trackingInterval = setInterval(() => {
+                const randomNumber = Math.floor(Math.random() * 10) + 1;
+                let message = '';
+                const time = new Date().toLocaleString(); // Get current time
+                const location = "Australia"; // Set default location to Australia
+
+                if (randomNumber >= 1 && randomNumber <= 3) {
+                    message = 'No fall detected';
+                    noFallCount++;
+                } else if (randomNumber >= 4 && randomNumber <= 6) {
+                    message = 'Trip detected';
+                    tripCount++;
+                } else if (randomNumber >= 7 && randomNumber <= 9) {
+                    message = 'Small fall detected';
+                    smallFallCount++;
+                } else if (randomNumber === 10) {
+                    message = 'Large fall detected. Emergency services have been contacted.';
+                    largeFallCount++;
+                    alertEmergency(); // Trigger emergency alerts when a large fall is detected
+                }
+
+                logActivity(message, time, location);
+                trackingResults.push({ message: 'Movement detected', time, location }); // Store tracking results
+                updateStats();
+
+                outputsRemaining--;
+                if (outputsRemaining <= 0) {
+                    clearInterval(trackingInterval); // Stop the tracking after 5 outputs
+                    trackingButton.textContent = 'Start Tracking'; // Reset button text
+                    trackingButton.classList.remove('active');
+                    generateReport(); // Generate report after tracking completes
+                }
+            }, 1000); // Log activity every second
+        }
+
+        function logActivity(message, time, location) {
+            const activityLog = document.getElementById('activityLog');
+            const li = document.createElement('li');
+            li.textContent = `${time}: ${message}`;
+            li.onclick = function () {
+                document.getElementById('activityDetails').textContent = `Time: ${time}, Location: ${location}, Message: ${message}`;
+                document.getElementById('myModal').style.display = 'block'; // Show modal
+            };
+            activityLog.appendChild(li);
+        }
+
+        function updateStats() {
+            document.getElementById('noFallCount').textContent = noFallCount;
+            document.getElementById('tripCount').textContent = tripCount;
+            document.getElementById('smallFallCount').textContent = smallFallCount;
+            document.getElementById('largeFallCount').textContent = largeFallCount;
+        }
+
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none'; // Close modal
+        }
+
+        function alertEmergency() {
+            alert("Emergency! A large fall has been detected. Emergency services have been contacted."); // Alert for large fall
+        }
+
+        function generateReport() {
+            const trackingReport = document.getElementById('trackingReport');
+            trackingResults.forEach((result) => {
+                const li = document.createElement('li');
+                li.textContent = `Movement detected. Time: ${result.time}, Location: ${result.location}`;
+                trackingReport.appendChild(li); // Add to tracking report
+            });
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('myModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
 </body>
 </html>
