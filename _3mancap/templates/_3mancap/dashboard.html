@@ -6,6 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js library -->
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -30,6 +32,7 @@
             border-radius: 5px;
             margin: 10px;
             transition: background-color 0.3s ease, transform 0.3s ease;
+            width: 200px; /* Set a fixed width for buttons */
         }
 
         #toggleBtn {
@@ -60,13 +63,13 @@
             display: flex;
             justify-content: space-between;
             margin-top: 30px;
-            width: 80%;
+            width: 90%; /* Set a width that fits well on screen */
             margin-left: auto;
             margin-right: auto;
         }
 
         .activity-log, .stats {
-            width: 45%;
+            width: 45%; /* Set both columns to the same width */
             text-align: left;
             padding: 15px;
             border-radius: 5px;
@@ -89,7 +92,7 @@
             background-color: #e0e0e0;
             border-radius: 5px;
             transition: background-color 0.3s ease;
-            cursor: pointer; /* Indicate that the item is clickable */
+            cursor: pointer;
         }
 
         .activity-log li:hover {
@@ -105,12 +108,11 @@
             margin-top: 20px;
             padding: 10px;
             border-radius: 5px;
-            background-color: #d0f0c0; /* Light green background */
-            width: 80%; /* Set width to align with the other sections */
-            max-width: 600px; /* Max width for the report */
-            margin-left: auto; /* Center the report */
-            margin-right: auto; /* Center the report */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add some shadow for depth */
+            background-color: #add8e6; /* Changed to light blue */
+            width: 90%; /* Set a width that fits well on screen */
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .tracking-report h2 {
@@ -125,64 +127,79 @@
         .tracking-report li {
             margin: 5px 0;
             padding: 5px;
-            background-color: #b2e0b2; /* Slightly darker green */
+            background-color: #b2e0b2;
             border-radius: 5px;
         }
 
-        .button:hover {
-            transform: scale(1.05);
+        .live-monitoring {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f0e68c;
+            width: 100%; /* Set width to 100% */
+            margin-left: 0; /* Remove left margin */
+            margin-right: 0; /* Remove right margin */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        /* Modal Styles */
-        #myModal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+        .live-monitoring h2 {
+            font-size: 24px;
         }
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
+        .live-monitoring ul {
+            list-style-type: none;
+            padding: 0;
         }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+        #map {
+            height: 400px;
+            width: 90%; /* Set a width that fits well on screen */
+            margin: 20px auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
+        #fallChartContainer {
+            width: 90%; /* Set a width that fits well on screen */
+            margin: 20px auto;
+            padding: 15px; /* Add padding for better spacing */
+            border: 2px solid #4A90E2; /* Add border */
+            border-radius: 5px; /* Add border radius */
+            background-color: #e7f4e4; /* Light background color to match Tracking Report */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: block; /* Always display the chart container */
         }
 
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                width: 90%;
-            }
+        canvas {
+            margin-top: 20px;
+        }
 
-            .activity-log, .stats {
-                width: 100%;
-                margin-bottom: 20px;
-            }
+        /* Client Profiles Section */
+        .client-profiles {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f1f1f1;
+            width: 100%; /* Set width to 100% */
+            margin-left: 0; /* Remove left margin */
+            margin-right: 0; /* Remove right margin */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
 
-            .tracking-report {
-                width: 100%; /* Full width for smaller screens */
-            }
+        .client-profiles h2 {
+            font-size: 24px;
+        }
+
+        .client-profiles ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .client-profiles li {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -191,7 +208,7 @@
     <h1>Dashboard</h1>
 
     <button id="toggleBtn" class="button" onclick="toggleOnOff()">On</button>
-    <button id="startTrackingBtn" class="button" onclick="startTracking()">Start Tracking</button>
+    <button id="startTrackingBtn" class="button" onclick="startTracking()" disabled>Start Tracking</button>
     <button id="panicButton" class="button" onclick="alertEmergency()">Panic Button</button>
 
     <div class="container">
@@ -214,128 +231,221 @@
         <ul id="trackingReport"></ul>
     </div>
 
-    <!-- Modal for Activity Details -->
-    <div id="myModal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Activity Details</h2>
-            <p id="activityDetails"></p>
-        </div>
+    <!-- Fall Stats Graph -->
+    <div id="fallChartContainer">
+        <h2>Fall Activity Chart</h2>
+        <canvas id="fallChart"></canvas>
     </div>
 
+    <!-- Live View Monitoring Section -->
+    <div class="live-monitoring">
+        <h2>Live View Monitoring</h2>
+        <ul id="liveMonitoringList"></ul>
+    </div>
+
+    <!-- Interactive Map -->
+    <div id="map"></div>
+
+    <!-- Client Profiles Section -->
+    <div class="client-profiles">
+        <h2>Client Profiles</h2>
+        <ul>
+            <li><strong>Name:</strong> Nancy<br><strong>Age:</strong> 72<br><strong>Condition:</strong> Arthritis<br><strong>Room:</strong> Room A</li>
+            <li><strong>Name:</strong> Jamie<br><strong>Age:</strong> 65<br><strong>Condition:</strong> Hypertension<br><strong>Room:</strong> Room B</li>
+            <!-- Add more client profiles here -->
+        </ul>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         let isOn = false;
         let noFallCount = 0;
         let tripCount = 0;
         let smallFallCount = 0;
         let largeFallCount = 0;
-        let trackingInterval; // Variable to hold the interval
-        let trackingResults = []; // Array to hold tracking results
+        let map;
+        let markers = [];
+        const patientName = "Nancy"; // Change this to Jamie or any other name
+        const users = {
+            "Nancy": {
+                age: 72,
+                conditions: "Arthritis",
+                room: "Room A",
+            },
+            "Jamie": {
+                age: 65,
+                conditions: "Hypertension",
+                room: "Room B",
+            },
+            // Add more users here
+        };
+
+        // Chart.js Variables
+        const fallChartCtx = document.getElementById('fallChart').getContext('2d');
+        let fallChart;
+
+        function initMap() {
+            map = L.map('map').setView([-25.2744, 133.7751], 4); // Initial map view
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+        }
 
         function toggleOnOff() {
             const button = document.getElementById('toggleBtn');
-            isOn = !isOn; // Toggle the state
+            isOn = !isOn;
+            button.textContent = isOn ? 'Off' : 'On'; // Toggle button text
+            button.classList.toggle('off'); // Toggle off class
+            
+            const startTrackingBtn = document.getElementById('startTrackingBtn');
+            startTrackingBtn.disabled = !isOn; // Enable/disable start tracking button
 
-            if (isOn) {
-                button.textContent = 'Off';  // Change text to 'Off'
-                button.classList.add('off');  // Add 'off' class for red background
-            } else {
-                button.textContent = 'On';   // Change text to 'On'
-                button.classList.remove('off'); // Remove 'off' class for green background
+            // Reset counts and chart data if turned off
+            if (!isOn) {
+                resetData();
             }
+        }
+
+        function resetData() {
+            noFallCount = 0;
+            tripCount = 0;
+            smallFallCount = 0;
+            largeFallCount = 0;
+            updateChart();
+            document.getElementById('trackingReport').innerHTML = ''; // Clear the tracking report
         }
 
         function startTracking() {
-            // Only proceed if the toggle is "On"
-            if (!isOn) {
-                alert("Please turn on the tracking before starting.");
-                return; // Exit the function early
+            const activityTypes = ['No Fall', 'Trip', 'Small Fall', 'Large Fall'];
+            const rooms = ['Room A', 'Room B', 'Room C', 'Room D', 'Room E'];
+
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const activity = activityTypes[Math.floor(Math.random() * activityTypes.length)];
+                    const room = rooms[Math.floor(Math.random() * rooms.length)];
+                    logActivity(activity, room); // Log the activity with room info
+                }, i * 2000); // Delay each activity by 2 seconds
             }
 
-            const trackingButton = document.getElementById('startTrackingBtn');
-            trackingButton.textContent = 'Tracking in Progress'; // Change button text
-            trackingButton.classList.add('active');
-
-            let outputsRemaining = 5; // Number of outputs to generate
-            trackingResults = []; // Clear previous tracking results
-
-            trackingInterval = setInterval(() => {
-                const randomNumber = Math.floor(Math.random() * 10) + 1;
-                let message = '';
-                const time = new Date().toLocaleString(); // Get current time
-                const location = "Australia"; // Set default location to Australia
-
-                if (randomNumber >= 1 && randomNumber <= 3) {
-                    message = 'No fall detected';
-                    noFallCount++;
-                } else if (randomNumber >= 4 && randomNumber <= 6) {
-                    message = 'Trip detected';
-                    tripCount++;
-                } else if (randomNumber >= 7 && randomNumber <= 9) {
-                    message = 'Small fall detected';
-                    smallFallCount++;
-                } else if (randomNumber === 10) {
-                    message = 'Large fall detected. Emergency services have been contacted.';
-                    largeFallCount++;
-                    alertEmergency(); // Trigger emergency alerts when a large fall is detected
-                }
-
-                logActivity(message, time, location);
-                trackingResults.push({ message: 'Movement detected', time, location }); // Store tracking results
-                updateStats();
-
-                outputsRemaining--;
-                if (outputsRemaining <= 0) {
-                    clearInterval(trackingInterval); // Stop the tracking after 5 outputs
-                    trackingButton.textContent = 'Start Tracking'; // Reset button text
-                    trackingButton.classList.remove('active');
-                    generateReport(); // Generate report after tracking completes
-                }
-            }, 1000); // Log activity every second
+            document.getElementById('startTrackingBtn').classList.add('active'); // Change button style
         }
 
-        function logActivity(message, time, location) {
+        function logActivity(activity, room) {
+            const lat = -25.2744 + (Math.random() * 10 - 5); // Random latitude within a range
+            const lon = 133.7751 + (Math.random() * 10 - 5); // Random longitude within a range
+
+            if (activity === 'No Fall') {
+                noFallCount++;
+                document.getElementById('noFallCount').textContent = noFallCount;
+            } else if (activity === 'Trip') {
+                tripCount++;
+                document.getElementById('tripCount').textContent = tripCount;
+            } else if (activity === 'Small Fall') {
+                smallFallCount++;
+                document.getElementById('smallFallCount').textContent = smallFallCount;
+            } else if (activity === 'Large Fall') {
+                largeFallCount++;
+                document.getElementById('largeFallCount').textContent = largeFallCount;
+            }
+
+            const message = `${activity} detected in ${room}`;
+            logToActivityList(message); // Log activity in the activity log
+            updateMap(lat, lon, room, activity); // Update the map with the location
+
+            // Update the chart with new data
+            updateChart();
+            
+            // Generate tracking report
+            generateTrackingReport();
+        }
+
+        function logToActivityList(message) {
             const activityLog = document.getElementById('activityLog');
             const li = document.createElement('li');
-            li.textContent = `${time}: ${message}`;
-            li.onclick = function () {
-                document.getElementById('activityDetails').textContent = `Time: ${time}, Location: ${location}, Message: ${message}`;
-                document.getElementById('myModal').style.display = 'block'; // Show modal
+            li.textContent = message; // Display personalized message
+            li.onclick = function() {
+                showUserInfo(); // Show additional information when clicked
             };
-            activityLog.appendChild(li);
+            activityLog.appendChild(li); // Append message to activity log
         }
 
-        function updateStats() {
-            document.getElementById('noFallCount').textContent = noFallCount;
-            document.getElementById('tripCount').textContent = tripCount;
-            document.getElementById('smallFallCount').textContent = smallFallCount;
-            document.getElementById('largeFallCount').textContent = largeFallCount;
+        function generateTrackingReport() {
+            const report = document.getElementById('trackingReport');
+            report.innerHTML = ''; // Clear previous report
+
+            report.innerHTML += `<li>No Fall: ${noFallCount}</li>`;
+            report.innerHTML += `<li>Trip: ${tripCount}</li>`;
+            report.innerHTML += `<li>Small Fall: ${smallFallCount}</li>`;
+            report.innerHTML += `<li>Large Fall: ${largeFallCount}</li>`;
         }
 
-        function closeModal() {
-            document.getElementById('myModal').style.display = 'none'; // Close modal
+        function showUserInfo() {
+            const userInfo = `
+                Name: ${patientName}
+                Age: ${users[patientName].age}
+                Health Condition: ${users[patientName].conditions}
+                Room: ${users[patientName].room}
+            `;
+            alert(userInfo); // Show user info in an alert box, you can replace this with a modal for a better design
+        }
+
+        function updateMap(lat, lon, room, activity) {
+            const marker = L.marker([lat, lon]).addTo(map);
+            marker.bindPopup(`<b>${activity}</b><br>Detected in ${room}`).openPopup();
+            markers.push(marker); // Store marker to later remove if needed
         }
 
         function alertEmergency() {
-            alert("Emergency! A large fall has been detected. Emergency services have been contacted."); // Alert for large fall
+            alert('Emergency Alert! Immediate action required.');
         }
 
-        function generateReport() {
-            const trackingReport = document.getElementById('trackingReport');
-            trackingResults.forEach((result) => {
-                const li = document.createElement('li');
-                li.textContent = `Movement detected. Time: ${result.time}, Location: ${result.location}`;
-                trackingReport.appendChild(li); // Add to tracking report
+        function createChart() {
+            fallChart = new Chart(fallChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['No Fall', 'Trip', 'Small Fall', 'Large Fall'],
+                    datasets: [{
+                        label: 'Fall Activity Counts',
+                        data: [noFallCount, tripCount, smallFallCount, largeFallCount],
+                        backgroundColor: [
+                            'rgba(255, 0, 0, 0.2)', // Set the chart color to red
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(54, 162, 235, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 0, 0, 1)', // Set the border color to red
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
             });
         }
 
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            const modal = document.getElementById('myModal');
-            if (event.target === modal) {
-                closeModal();
+        function updateChart() {
+            if (fallChart) {
+                fallChart.data.datasets[0].data = [noFallCount, tripCount, smallFallCount, largeFallCount];
+                fallChart.update();
+            } else {
+                createChart();
             }
         }
+
+        // Initialize map and chart
+        initMap();
+        createChart(); // Create an initial chart with default values
     </script>
 </body>
 </html>
