@@ -27,4 +27,5 @@ urlpatterns = [
     path('', views.dashboard, name='home'),  # Serve the dashboard at the root
     # Optionally, include other URLs if necessary
     # path('_3mancap/', include('_3mancap.urls')),
+    path('', include('_3mancap.urls')),
 ]
